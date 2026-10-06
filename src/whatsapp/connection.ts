@@ -9,6 +9,7 @@ import { Boom } from "@hapi/boom";
 import path from "path";
 import QRCode from "qrcode-terminal";
 import { logger } from "../utils/logger.js";
+import { registerAdminCommands } from "../commands/adminCommands.js";
 
 let activeSocket: WASocket | null = null;
 let botPhone: string = "";
@@ -79,6 +80,9 @@ export async function connectToWhatsApp(): Promise<WASocket> {
       logger.info({ botPhone }, "✅ WhatsApp conectado com sucesso para o Canal Bíblico!");
     }
   });
+
+  // Registra comandos administrativos privados para testes imediatos (/postar, /bomdia, /boanoite)
+  registerAdminCommands(sock);
 
   return sock;
 }

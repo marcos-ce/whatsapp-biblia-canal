@@ -12,6 +12,11 @@ export const env = {
   CHANNEL_INVITE_LINK:
     process.env.CHANNEL_INVITE_LINK ||
     "https://whatsapp.com/channel/0029VbDYU2MAInPrO6krdG0g",
+
+  // Seu número pessoal de WhatsApp para poder mandar comandos de teste (opcional)
+  // Ex: 5585999999999 (mensagens enviadas por você mesmo no próprio aparelho sempre funcionam)
+  ADMIN_PHONE: process.env.ADMIN_PHONE || "",
+
   MORNING_HOUR: parseInt(process.env.MORNING_HOUR || "6", 10),
   MORNING_MINUTE: parseInt(process.env.MORNING_MINUTE || "0", 10),
   EVENING_HOUR: parseInt(process.env.EVENING_HOUR || "18", 10),
