@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { CURATED_VERSES, BibleVerse, DayPeriod } from "./verses.js";
-import { env } from "../config/env.js";
+import { DEVOTIONALS, DevotionalPost } from "./devotionals.js";
 
 const DATA_DIR = path.resolve(process.cwd(), "data");
 const HISTORY_FILE = path.resolve(DATA_DIR, "history.json");
@@ -12,61 +11,59 @@ function ensureDataDir(): void {
   }
 }
 
-interface VerseHistory {
-  sentVerseIds: number[];
-  lastSentMorningDate?: string;
-  lastSentEveningDate?: string;
+interface DevotionalHistory {
+  sentIds: number[];
+  lastMorningDate?: string;
+  lastEveningDate?: string;
 }
 
-function loadHistory(): VerseHistory {
+function loadHistory(): DevotionalHistory {
   ensureDataDir();
   if (!fs.existsSync(HISTORY_FILE)) {
-    return { sentVerseIds: [] };
+    return { sentIds: [] };
   }
   try {
     const raw = fs.readFileSync(HISTORY_FILE, "utf-8");
     return JSON.parse(raw);
   } catch {
-    return { sentVerseIds: [] };
+    return { sentIds: [] };
   }
 }
 
-function saveHistory(history: VerseHistory): void {
+function saveHistory(history: DevotionalHistory): void {
   ensureDataDir();
   fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), "utf-8");
 }
 
 export class BibleService {
   /**
-   * Obtém o versículo do período (manhã ou noite) evitando repetições recentes
+   * Obtém o devocional humanizado do período (manhã ou noite) sem repetições recentes
    */
-  static getVerseForPeriod(period: "morning" | "evening"): BibleVerse {
+  static getDevotional(period: "morning" | "evening"): DevotionalPost {
     const history = loadHistory();
 
-    // Filtra pelo período desejado
-    const pool = CURATED_VERSES.filter((v) => v.period === period || v.period === "any");
-    const available = pool.filter((v) => !history.sentVerseIds.includes(v.id));
+    const pool = DEVOTIONALS.filter((d) => d.period === period);
+    const available = pool.filter((d) => !history.sentIds.includes(d.id));
 
-    let chosen: BibleVerse;
+    let chosen: DevotionalPost;
 
     if (available.length > 0) {
       const index = Math.floor(Math.random() * available.length);
       chosen = available[index];
     } else {
-      // Se todos os versículos do período já foram usados, reinicia a lista daquele período
-      const poolIds = new Set(pool.map((v) => v.id));
-      history.sentVerseIds = history.sentVerseIds.filter((id) => !poolIds.has(id));
+      // Se todos os devocionais do período já foram enviados, reinicia o histórico desse período
+      const poolIds = new Set(pool.map((d) => d.id));
+      history.sentIds = history.sentIds.filter((id) => !poolIds.has(id));
       const index = Math.floor(Math.random() * pool.length);
       chosen = pool[index];
     }
 
-    // Registra no histórico
-    history.sentVerseIds.push(chosen.id);
+    history.sentIds.push(chosen.id);
     const today = new Date().toISOString().split("T")[0];
     if (period === "morning") {
-      history.lastSentMorningDate = today;
+      history.lastMorningDate = today;
     } else {
-      history.lastSentEveningDate = today;
+      history.lastEveningDate = today;
     }
     saveHistory(history);
 
@@ -74,40 +71,15 @@ export class BibleService {
   }
 
   /**
-   * Formata a mensagem com base no período (Bom dia ou Boa noite)
+   * Formata a mensagem com tom 100% acolhedor, humano e natural (sem linhas robóticas ou tags)
    */
-  static formatMessage(verse: BibleVerse, period: "morning" | "evening"): string {
-    const dateFormatted = new Intl.DateTimeFormat("pt-BR", {
-      dateStyle: "long",
-      timeZone: "America/Sao_Paulo",
-    }).format(new Date());
-
-    const channelFooter = env.CHANNEL_INVITE_LINK
-      ? `\n📢 *Canal Oficial:* ${env.CHANNEL_NAME}\n📲 *Participe:* ${env.CHANNEL_INVITE_LINK}`
-      : `\n✨ *${env.CHANNEL_NAME}*`;
-
-    if (period === "morning") {
-      return (
-        `☀️ *BOM DIA COM DEUS* ☀️\n` +
-        `📅 _${dateFormatted}_\n\n` +
-        `📖 *${verse.book} ${verse.chapter}:${verse.verse}* (${verse.version})\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `"${verse.text}"\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━\n` +
-        `🕊️ *Tema:* ${verse.theme}\n` +
-        `_Que o Senhor abençoe o seu dia e ilumine cada um dos seus passos!_${channelFooter}`
-      );
-    } else {
-      return (
-        `🌙 *BOA NOITE NA PAZ DE DEUS* 🌙\n` +
-        `📅 _${dateFormatted}_\n\n` +
-        `📖 *${verse.book} ${verse.chapter}:${verse.verse}* (${verse.version})\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `"${verse.text}"\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━\n` +
-        `🕊️ *Tema:* ${verse.theme}\n` +
-        `_Entregue o dia que passou ao Senhor e tenha uma noite de sono tranquilo e descanso renovador!_${channelFooter}`
-      );
-    }
+  static formatMessage(post: DevotionalPost): string {
+    return (
+      `${post.greeting}\n\n` +
+      `${post.reflection}\n\n` +
+      `📖 *${post.book} ${post.chapter}:${post.verse}*\n` +
+      `"${post.scripture}"\n\n` +
+      `${post.blessing}`
+    );
   }
 }

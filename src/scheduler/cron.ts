@@ -10,9 +10,9 @@ export function startDailyScheduler(): void {
   const pad = (n: number) => String(n).padStart(2, "0");
 
   logger.info(
-    `⏰ Agendador ativo! Programado para 2 envios diários:\n` +
-      `   ☀️ Bom Dia:   ${pad(env.MORNING_HOUR)}:${pad(env.MORNING_MINUTE)} (Horário de Brasília)\n` +
-      `   🌙 Boa Noite:  ${pad(env.EVENING_HOUR)}:${pad(env.EVENING_MINUTE)} (Horário de Brasília)`
+    `⏰ Agendador ativo e 100% automático:\n` +
+      `   ☀️ 06h00: Foto HD + Devocional de BOM DIA\n` +
+      `   🌙 18h00: Foto HD + Devocional de BOA NOITE`
   );
 
   // Checa a cada 30 segundos
@@ -42,10 +42,10 @@ export function startDailyScheduler(): void {
         lastMorningRunDate !== todayStr
       ) {
         lastMorningRunDate = todayStr;
-        logger.info(`☀️ Horário da manhã atingido (${brTimeStr}). Publicando BOM DIA no canal...`);
+        logger.info(`☀️ Horário da manhã atingido (${brTimeStr}). Publicando foto e devocional no canal...`);
 
-        const verse = BibleService.getVerseForPeriod("morning");
-        await ChannelPublisher.publishVerse(verse, "morning");
+        const post = BibleService.getDevotional("morning");
+        await ChannelPublisher.publishDevotional(post);
       }
 
       // 2. Disparo de Boa Noite (Noite)
@@ -55,10 +55,10 @@ export function startDailyScheduler(): void {
         lastEveningRunDate !== todayStr
       ) {
         lastEveningRunDate = todayStr;
-        logger.info(`🌙 Horário da noite atingido (${brTimeStr}). Publicando BOA NOITE no canal...`);
+        logger.info(`🌙 Horário da noite atingido (${brTimeStr}). Publicando foto e devocional no canal...`);
 
-        const verse = BibleService.getVerseForPeriod("evening");
-        await ChannelPublisher.publishVerse(verse, "evening");
+        const post = BibleService.getDevotional("evening");
+        await ChannelPublisher.publishDevotional(post);
       }
     } catch (err: any) {
       logger.error({ err: err?.message || err }, "Erro na execução do agendador diário.");

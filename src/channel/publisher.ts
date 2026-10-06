@@ -1,7 +1,7 @@
 import { getSocket, isWhatsAppConnected } from "../whatsapp/connection.js";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
-import { BibleVerse } from "../bible/verses.js";
+import { DevotionalPost } from "../bible/devotionals.js";
 import { BibleService } from "../bible/bibleService.js";
 
 let resolvedChannelJid: string | null = null;
@@ -16,13 +16,11 @@ export class ChannelPublisher {
     const target = env.CHANNEL_JID.trim();
     if (!target) return null;
 
-    // Se já é um JID completo de newsletter ou grupo
     if (target.endsWith("@newsletter") || target.endsWith("@g.us")) {
       resolvedChannelJid = target;
       return resolvedChannelJid;
     }
 
-    // Se for link do WhatsApp Channel: https://whatsapp.com/channel/0029VbDYU2MAInPrO6krdG0g
     const match = target.match(/whatsapp\.com\/channel\/([a-zA-Z0-9_-]+)/i);
     const inviteCode = match ? match[1] : target;
 
@@ -49,13 +47,9 @@ export class ChannelPublisher {
   }
 
   /**
-   * Publica o versículo no canal oficial configurado
+   * Publica o devocional no canal com foto HD e legenda humanizada
    */
-  static async publishVerse(
-    verse: BibleVerse,
-    period: "morning" | "evening" = "morning",
-    imageUrl?: string
-  ): Promise<boolean> {
+  static async publishDevotional(post: DevotionalPost): Promise<boolean> {
     if (!isWhatsAppConnected()) {
       logger.error("Não é possível publicar: WhatsApp não está conectado.");
       return false;
@@ -63,15 +57,15 @@ export class ChannelPublisher {
 
     const channelJid = await this.resolveChannelJid();
     if (!channelJid) {
-      logger.error("Não foi possível determinar o JID do canal. Verifique se o link ou JID no .env está correto.");
+      logger.error("Não foi possível determinar o JID do canal. Verifique o link ou JID no .env.");
       return false;
     }
 
-    // 🛡️ TRAVA DE SEGURANÇA MÁXIMA: Impede terminantemente envio para números individuais
+    // 🛡️ TRAVA DE SEGURANÇA MÁXIMA: Impede envio para números individuais
     if (channelJid.endsWith("@s.whatsapp.net") || /^\d+$/.test(channelJid)) {
       logger.fatal(
         { channelJid },
-        "⛔ BLOQUEIO DE SEGURANÇA: Destinatário resolvido é um número privado! O bot foi desenvolvido EXCLUSIVAMENTE para canais (@newsletter) e grupos (@g.us). Envio cancelado."
+        "⛔ BLOQUEIO DE SEGURANÇA: Destinatário é um número privado! O bot foi desenvolvido EXCLUSIVAMENTE para canais (@newsletter) e grupos (@g.us). Envio cancelado."
       );
       return false;
     }
@@ -85,26 +79,33 @@ export class ChannelPublisher {
     }
 
     const sock = getSocket();
-    const messageText = BibleService.formatMessage(verse, period);
+    const captionText = BibleService.formatMessage(post);
 
     logger.info(
-      { channelJid, period, verse: `${verse.book} ${verse.chapter}:${verse.verse}` },
-      `Publicando mensagem de ${period === "morning" ? "BOM DIA" : "BOA NOITE"} no canal...`
+      { channelJid, period: post.period, verse: `${post.book} ${post.chapter}:${post.verse}` },
+      `Publicando devocional de ${post.period === "morning" ? "BOM DIA" : "BOA NOITE"} com foto HD no canal...`
     );
 
-    try {
-      if (imageUrl) {
+    // 1. Tenta enviar com a Foto HD profissional
+    if (post.imageUrl) {
+      try {
         await sock.sendMessage(channelJid, {
-          image: { url: imageUrl },
-          caption: messageText,
+          image: { url: post.imageUrl },
+          caption: captionText,
         });
-      } else {
-        await sock.sendMessage(channelJid, {
-          text: messageText,
-        });
+        logger.info(`✅ Foto HD + Devocional de ${post.period === "morning" ? "BOM DIA" : "BOA NOITE"} publicados com sucesso!`);
+        return true;
+      } catch (imgErr: any) {
+        logger.warn({ err: imgErr?.message }, "Falha ao baixar/enviar a foto. Alternando para envio de texto direto...");
       }
+    }
 
-      logger.info(`✅ Mensagem de ${period === "morning" ? "BOM DIA" : "BOA NOITE"} publicada com sucesso no canal!`);
+    // 2. Fallback de segurança: se a imagem falhar, envia o texto direto
+    try {
+      await sock.sendMessage(channelJid, {
+        text: captionText,
+      });
+      logger.info(`✅ Devocional publicado com sucesso em formato texto!`);
       return true;
     } catch (err: any) {
       logger.error({ err: err?.message || err }, "❌ Falha ao publicar no canal do WhatsApp.");

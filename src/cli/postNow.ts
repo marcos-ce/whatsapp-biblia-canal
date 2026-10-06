@@ -16,7 +16,7 @@ async function run() {
       : "morning";
 
   logger.info(
-    `🚀 Disparo manual de teste para o canal: ${period === "morning" ? "☀️ BOM DIA" : "🌙 BOA NOITE"}...`
+    `🚀 Disparo manual de teste para o canal: Foto HD + Devocional de ${period === "morning" ? "☀️ BOM DIA" : "🌙 BOA NOITE"}...`
   );
 
   const sock = await connectToWhatsApp();
@@ -30,18 +30,21 @@ async function run() {
     });
   });
 
-  const verse = BibleService.getVerseForPeriod(period);
-  logger.info({ verse: `${verse.book} ${verse.chapter}:${verse.verse}` }, "Versículo selecionado");
+  const post = BibleService.getDevotional(period);
+  logger.info(
+    { verse: `${post.book} ${post.chapter}:${post.verse}`, photo: post.imageUrl },
+    "Devocional selecionado com foto HD"
+  );
 
-  const success = await ChannelPublisher.publishVerse(verse, period);
+  const success = await ChannelPublisher.publishDevotional(post);
 
   if (success) {
-    logger.info("🎉 Sucesso! Mensagem entregue no canal.");
+    logger.info("🎉 Sucesso! Foto HD e devocional entregues no canal.");
   } else {
-    logger.error("Falha no disparo manual. Verifique o CHANNEL_JID no .env.");
+    logger.error("Falha no disparo manual. Verifique o CHANNEL_JID ou convite do canal.");
   }
 
-  setTimeout(() => process.exit(0), 2000);
+  setTimeout(() => process.exit(0), 3000);
 }
 
 run().catch((err) => {
