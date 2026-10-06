@@ -1,14 +1,26 @@
-import { connectToWhatsApp, getSocket } from "../whatsapp/connection.js";
+import { connectToWhatsApp } from "../whatsapp/connection.js";
 import { BibleService } from "../bible/bibleService.js";
 import { ChannelPublisher } from "../channel/publisher.js";
 import { logger } from "../utils/logger.js";
 
 async function run() {
-  logger.info("🚀 Iniciando disparo manual de teste para o canal...");
+  const arg = process.argv[2]?.toLowerCase();
+  const currentHour = new Date().getHours();
+  const period: "morning" | "evening" =
+    arg === "evening" || arg === "noite"
+      ? "evening"
+      : arg === "morning" || arg === "manha" || arg === "manhã"
+      ? "morning"
+      : currentHour >= 16 || currentHour < 4
+      ? "evening"
+      : "morning";
+
+  logger.info(
+    `🚀 Disparo manual de teste para o canal: ${period === "morning" ? "☀️ BOM DIA" : "🌙 BOA NOITE"}...`
+  );
 
   const sock = await connectToWhatsApp();
 
-  // Aguarda conexão estabelecer
   logger.info("Aguardando conexão com o WhatsApp...");
   await new Promise<void>((resolve) => {
     sock.ev.on("connection.update", (update) => {
@@ -18,10 +30,10 @@ async function run() {
     });
   });
 
-  const verse = BibleService.getDailyVerse();
+  const verse = BibleService.getVerseForPeriod(period);
   logger.info({ verse: `${verse.book} ${verse.chapter}:${verse.verse}` }, "Versículo selecionado");
 
-  const success = await ChannelPublisher.publishVerse(verse);
+  const success = await ChannelPublisher.publishVerse(verse, period);
 
   if (success) {
     logger.info("🎉 Sucesso! Mensagem entregue no canal.");

@@ -3,15 +3,16 @@ import { logger } from "../utils/logger.js";
 import { BibleService } from "../bible/bibleService.js";
 import { ChannelPublisher } from "../channel/publisher.js";
 
-let lastRunDate: string = "";
+let lastMorningRunDate: string = "";
+let lastEveningRunDate: string = "";
 
 export function startDailyScheduler(): void {
-  const targetHour = env.SCHEDULE_HOUR;
-  const targetMinute = env.SCHEDULE_MINUTE;
-
   const pad = (n: number) => String(n).padStart(2, "0");
+
   logger.info(
-    `⏰ Agendador ativo! Postagem diária configurada para as ${pad(targetHour)}:${pad(targetMinute)} (Horário de Brasília).`
+    `⏰ Agendador ativo! Programado para 2 envios diários:\n` +
+      `   ☀️ Bom Dia:   ${pad(env.MORNING_HOUR)}:${pad(env.MORNING_MINUTE)} (Horário de Brasília)\n` +
+      `   🌙 Boa Noite:  ${pad(env.EVENING_HOUR)}:${pad(env.EVENING_MINUTE)} (Horário de Brasília)`
   );
 
   // Checa a cada 30 segundos
@@ -34,16 +35,30 @@ export function startDailyScheduler(): void {
       const currentHour = parseInt(hourStr, 10);
       const currentMinute = parseInt(minStr, 10);
 
+      // 1. Disparo de Bom Dia (Manhã)
       if (
-        currentHour === targetHour &&
-        currentMinute === targetMinute &&
-        lastRunDate !== todayStr
+        currentHour === env.MORNING_HOUR &&
+        currentMinute === env.MORNING_MINUTE &&
+        lastMorningRunDate !== todayStr
       ) {
-        lastRunDate = todayStr;
-        logger.info(`⏰ Horário atingido (${brTimeStr}). Iniciando postagem matinal no canal...`);
+        lastMorningRunDate = todayStr;
+        logger.info(`☀️ Horário da manhã atingido (${brTimeStr}). Publicando BOM DIA no canal...`);
 
-        const verse = BibleService.getDailyVerse();
-        await ChannelPublisher.publishVerse(verse);
+        const verse = BibleService.getVerseForPeriod("morning");
+        await ChannelPublisher.publishVerse(verse, "morning");
+      }
+
+      // 2. Disparo de Boa Noite (Noite)
+      if (
+        currentHour === env.EVENING_HOUR &&
+        currentMinute === env.EVENING_MINUTE &&
+        lastEveningRunDate !== todayStr
+      ) {
+        lastEveningRunDate = todayStr;
+        logger.info(`🌙 Horário da noite atingido (${brTimeStr}). Publicando BOA NOITE no canal...`);
+
+        const verse = BibleService.getVerseForPeriod("evening");
+        await ChannelPublisher.publishVerse(verse, "evening");
       }
     } catch (err: any) {
       logger.error({ err: err?.message || err }, "Erro na execução do agendador diário.");

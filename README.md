@@ -6,12 +6,15 @@ Bot 100% autônomo e independente para envio diário de versículos bíblicos fo
 
 ### ✨ Características
 
+* **2 Postagens Diárias Automáticas:**
+  * ☀️ **06:00 da manhã (Bom Dia):** Versículos de ânimo, força, esperança e sabedoria para começar o dia.
+  * 🌙 **18:00 da noite (Boa Noite):** Versículos de paz, descanso, proteção e gratidão pelo dia que passou.
 * **Zero Inteligência Artificial:** Versículos 100% reais e autênticos da Bíblia Sagrada (NVI / Almeida), com livro, capítulo e referência exatos.
-* **Isolamento Total:** Projeto e repositório completamente separados da operação de vendas. Não toca em pagamentos, pedidos ou mensagens de clientes.
-* **Multi-Dispositivos:** O WhatsApp permite até 4 aparelhos conectados simultaneamente. Este bot se conecta ao mesmo número de telefone como um dispositivo adicional sem deslogar o bot de vendas.
-* **Agendamento Diário:** Disparo automático todo dia de manhã no horário configurado (ex: 06h30).
-* **Sem repetições:** Histórico inteligente para rotacionar temas e versículos sem repetir passagens recentes.
-* **Disparo manual sob demanda:** Script CLI para testar postagens imediatamente (`npm run post-now`).
+* **Isolamento Total:** Projeto e repositório completamente separados da operação de vendas. Não toca em pagamentos, pedidos ou clientes.
+* **Multi-Dispositivos:** Conecta-se ao mesmo número de WhatsApp como um aparelho adicional (sem deslogar o bot de vendas).
+* **Trava de Segurança:** Impossibilitado por código de enviar mensagens para contatos individuais ou ler conversas privadas.
+* **Sem repetições:** Histórico inteligente em `data/history.json` para não repetir versículos recentes.
+* **Disparo manual sob demanda:** Teste imediato a qualquer hora (`npm run post-now`).
 
 ---
 
@@ -31,28 +34,32 @@ Bot 100% autônomo e independente para envio diário de versículos bíblicos fo
    ```env
    CHANNEL_JID=120363xxxxxxxxxxxx@newsletter
    CHANNEL_NAME="Palavra Diária"
-   SCHEDULE_HOUR=6
-   SCHEDULE_MINUTE=30
+   MORNING_HOUR=6
+   MORNING_MINUTE=0
+   EVENING_HOUR=18
+   EVENING_MINUTE=0
    ```
 
-3. **Iniciar o bot:**
+3. **Iniciar o bot (para escanear o QR Code):**
    ```bash
    npm run dev
    ```
-   * Na primeira execução, um **QR Code** será exibido no terminal.
    * Abra o WhatsApp no celular: **Aparelhos Conectados > Conectar Aparelho** e escaneie.
 
 4. **Testar envio imediato:**
    ```bash
    npm run post-now
+   # ou especificando o período:
+   npm run post-now manha
+   npm run post-now noite
    ```
 
 ---
 
-### 🛡️ Rodando em Produção na VPS com PM2
+### 🛡️ Rodando em Produção na VPS com PM2 (Blindagem de Memória)
 
 ```bash
 npm run build
-pm2 start dist/index.js --name "whatsapp-biblia-canal"
+pm2 start dist/index.js --name "whatsapp-biblia-canal" --max-memory-restart 100M --node-args="--max-old-space-size=96"
 pm2 save
 ```

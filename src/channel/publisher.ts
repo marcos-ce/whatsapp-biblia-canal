@@ -8,7 +8,11 @@ export class ChannelPublisher {
   /**
    * Publica o versículo no canal oficial configurado
    */
-  static async publishVerse(verse: BibleVerse, imageUrl?: string): Promise<boolean> {
+  static async publishVerse(
+    verse: BibleVerse,
+    period: "morning" | "evening" = "morning",
+    imageUrl?: string
+  ): Promise<boolean> {
     if (!isWhatsAppConnected()) {
       logger.error("Não é possível publicar: WhatsApp não está conectado.");
       return false;
@@ -38,25 +42,26 @@ export class ChannelPublisher {
     }
 
     const sock = getSocket();
-    const messageText = BibleService.formatMessage(verse);
+    const messageText = BibleService.formatMessage(verse, period);
 
-    logger.info({ channelJid, verse: `${verse.book} ${verse.chapter}:${verse.verse}` }, "Publicando versículo no canal...");
+    logger.info(
+      { channelJid, period, verse: `${verse.book} ${verse.chapter}:${verse.verse}` },
+      `Publicando mensagem de ${period === "morning" ? "BOM DIA" : "BOA NOITE"} no canal...`
+    );
 
     try {
       if (imageUrl) {
-        // Envia foto com a legenda formatada
         await sock.sendMessage(channelJid, {
           image: { url: imageUrl },
           caption: messageText,
         });
       } else {
-        // Envia mensagem em texto formatado
         await sock.sendMessage(channelJid, {
           text: messageText,
         });
       }
 
-      logger.info("✅ Versículo publicado com sucesso no canal!");
+      logger.info(`✅ Mensagem de ${period === "morning" ? "BOM DIA" : "BOA NOITE"} publicada com sucesso no canal!`);
       return true;
     } catch (err: any) {
       logger.error({ err: err?.message || err }, "❌ Falha ao publicar no canal do WhatsApp.");
