@@ -4,7 +4,50 @@ import { logger } from "../utils/logger.js";
 import { BibleVerse } from "../bible/verses.js";
 import { BibleService } from "../bible/bibleService.js";
 
+let resolvedChannelJid: string | null = null;
+
 export class ChannelPublisher {
+  /**
+   * Resolve o JID oficial (@newsletter) a partir do link de convite ou JID direto
+   */
+  static async resolveChannelJid(): Promise<string | null> {
+    if (resolvedChannelJid) return resolvedChannelJid;
+
+    const target = env.CHANNEL_JID.trim();
+    if (!target) return null;
+
+    // Se já é um JID completo de newsletter ou grupo
+    if (target.endsWith("@newsletter") || target.endsWith("@g.us")) {
+      resolvedChannelJid = target;
+      return resolvedChannelJid;
+    }
+
+    // Se for link do WhatsApp Channel: https://whatsapp.com/channel/0029VbDYU2MAInPrO6krdG0g
+    const match = target.match(/whatsapp\.com\/channel\/([a-zA-Z0-9_-]+)/i);
+    const inviteCode = match ? match[1] : target;
+
+    try {
+      const sock = getSocket() as any;
+      logger.info({ inviteCode }, "Resolvendo JID oficial do canal via WhatsApp...");
+
+      if (typeof sock.newsletterMetadata === "function") {
+        const meta = await sock.newsletterMetadata("invite", inviteCode);
+        if (meta?.id) {
+          resolvedChannelJid = meta.id;
+          logger.info(
+            { jid: resolvedChannelJid, name: meta.name },
+            "✅ JID do canal resolvido com sucesso pelo link de convite!"
+          );
+          return resolvedChannelJid;
+        }
+      }
+    } catch (err: any) {
+      logger.error({ err: err?.message || err }, "Erro ao resolver JID pelo convite do canal.");
+    }
+
+    return null;
+  }
+
   /**
    * Publica o versículo no canal oficial configurado
    */
@@ -18,9 +61,9 @@ export class ChannelPublisher {
       return false;
     }
 
-    const channelJid = env.CHANNEL_JID.trim();
+    const channelJid = await this.resolveChannelJid();
     if (!channelJid) {
-      logger.error("CHANNEL_JID não configurado no .env! Defina o JID do canal antes de publicar.");
+      logger.error("Não foi possível determinar o JID do canal. Verifique se o link ou JID no .env está correto.");
       return false;
     }
 
@@ -28,7 +71,7 @@ export class ChannelPublisher {
     if (channelJid.endsWith("@s.whatsapp.net") || /^\d+$/.test(channelJid)) {
       logger.fatal(
         { channelJid },
-        "⛔ BLOQUEIO DE SEGURANÇA: CHANNEL_JID configurado é um número privado! O bot foi desenvolvido EXCLUSIVAMENTE para canais (@newsletter) e grupos (@g.us). Envio cancelado."
+        "⛔ BLOQUEIO DE SEGURANÇA: Destinatário resolvido é um número privado! O bot foi desenvolvido EXCLUSIVAMENTE para canais (@newsletter) e grupos (@g.us). Envio cancelado."
       );
       return false;
     }
@@ -36,7 +79,7 @@ export class ChannelPublisher {
     if (!channelJid.endsWith("@newsletter") && !channelJid.endsWith("@g.us")) {
       logger.error(
         { channelJid },
-        "⛔ CHANNEL_JID inválido: deve terminar com '@newsletter' (canal oficial) ou '@g.us' (grupo). Destinatários privados não são permitidos."
+        "⛔ Destinatário inválido: deve terminar com '@newsletter' (canal oficial) ou '@g.us' (grupo)."
       );
       return false;
     }

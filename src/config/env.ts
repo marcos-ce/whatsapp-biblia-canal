@@ -2,9 +2,16 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const env = {
-  CHANNEL_JID: process.env.CHANNEL_JID || "",
-  CHANNEL_NAME: process.env.CHANNEL_NAME || "Palavra Diária",
-  CHANNEL_INVITE_LINK: process.env.CHANNEL_INVITE_LINK || "",
+  // Aceita o JID direto (@newsletter) OU o link de convite completo do canal
+  CHANNEL_JID:
+    process.env.CHANNEL_JID ||
+    "https://whatsapp.com/channel/0029VbDYU2MAInPrO6krdG0g",
+  CHANNEL_NAME:
+    process.env.CHANNEL_NAME ||
+    "Bíblia Sagrada - Versículos E Devocional",
+  CHANNEL_INVITE_LINK:
+    process.env.CHANNEL_INVITE_LINK ||
+    "https://whatsapp.com/channel/0029VbDYU2MAInPrO6krdG0g",
   MORNING_HOUR: parseInt(process.env.MORNING_HOUR || "6", 10),
   MORNING_MINUTE: parseInt(process.env.MORNING_MINUTE || "0", 10),
   EVENING_HOUR: parseInt(process.env.EVENING_HOUR || "18", 10),
