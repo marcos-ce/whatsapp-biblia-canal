@@ -3,6 +3,7 @@ import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
 import { DevotionalPost } from "../bible/devotionals.js";
 import { BibleService } from "../bible/bibleService.js";
+import { ImageGenerator } from "../bible/imageGenerator.js";
 
 let resolvedChannelJid: string | null = null;
 
@@ -84,21 +85,25 @@ export class ChannelPublisher {
 
     logger.info(
       { channelJid, period: post.period, verse: `${post.book} ${post.chapter}:${post.verse}` },
-      `Publicando devocional de ${post.period === "morning" ? "BOM DIA" : "BOA NOITE"} com foto HD no canal...`
+      `Publicando devocional de ${post.period === "morning" ? "BOM DIA" : "BOA NOITE"} com card sagrado da Bíblia no canal...`
     );
 
-    // 1. Tenta enviar com a Foto HD profissional
-    if (post.imageUrl) {
-      try {
-        await sock.sendMessage(channelJid, {
-          image: { url: post.imageUrl },
-          caption: captionText,
-        });
-        logger.info(`✅ Foto HD + Devocional de ${post.period === "morning" ? "BOM DIA" : "BOA NOITE"} publicados com sucesso!`);
-        return true;
-      } catch (imgErr: any) {
-        logger.warn({ err: imgErr?.message }, "Falha ao baixar/enviar a foto. Alternando para envio de texto direto...");
-      }
+    // 1. Gera a imagem da Bíblia Sagrada com o texto de Bênção/Oração sobreposto
+    try {
+      const imageBuffer = await ImageGenerator.generateDevotionalCard(post);
+      await sock.sendMessage(channelJid, {
+        image: imageBuffer,
+        caption: captionText,
+      });
+      logger.info(
+        `✅ Imagem oficial da Bíblia com Bênção/Oração + Devocional de ${post.period === "morning" ? "BOM DIA" : "BOA NOITE"} publicados com sucesso!`
+      );
+      return true;
+    } catch (imgErr: any) {
+      logger.warn(
+        { err: imgErr?.message },
+        "Falha ao gerar/enviar a imagem com oração. Alternando para envio de texto direto..."
+      );
     }
 
     // 2. Fallback de segurança: se a imagem falhar, envia o texto direto
@@ -114,3 +119,4 @@ export class ChannelPublisher {
     }
   }
 }
+

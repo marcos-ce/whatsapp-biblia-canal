@@ -8,7 +8,7 @@ export interface DevotionalPost {
   greeting: string;
   reflection: string;
   blessing: string;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 export const DEVOTIONALS: DevotionalPost[] = [

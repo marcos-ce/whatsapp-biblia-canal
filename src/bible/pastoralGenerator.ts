@@ -252,55 +252,6 @@ const EVENING_BLESSINGS = [
   "Que a paz de Deus, que excede todo o entendimento, seja o guardião do seu sono até o raiar do sol. Boa noite! ✨",
 ];
 
-// ─────────────────────────────────────────────────────────────────
-// 🖼️ GALERIA DE FOTOS HD VERIFICADAS (NATUREZA SERENA, BÍBLIA, ALVORECER, ENTARDECER)
-// ─────────────────────────────────────────────────────────────────
-const MORNING_PHOTOS = [
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1080&q=80",
-  "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=1080&q=80",
-  "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=1080&q=80",
-  "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=1080&q=80",
-  "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1080&q=80",
-  "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=1080&q=80",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1080&q=80",
-  "https://images.unsplash.com/photo-1544717305-2782549b5136?w=1080&q=80",
-  "https://images.unsplash.com/photo-1519817650390-64a93db51149?w=1080&q=80",
-  "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1080&q=80",
-  "https://images.unsplash.com/photo-1448375240586-882707db888b?w=1080&q=80",
-  "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1080&q=80",
-  "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1080&q=80",
-  "https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?w=1080&q=80",
-  "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=1080&q=80",
-  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1080&q=80",
-  "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1080&q=80",
-  "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1080&q=80",
-  "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1080&q=80",
-  "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1080&q=80",
-];
-
-const EVENING_PHOTOS = [
-  "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1080&q=80",
-  "https://images.unsplash.com/photo-1499346030926-9a72daac6c63?w=1080&q=80",
-  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1080&q=80",
-  "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1080&q=80",
-  "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=1080&q=80",
-  "https://images.unsplash.com/photo-1511497584788-87676104235f?w=1080&q=80",
-  "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1080&q=80",
-  "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=1080&q=80",
-  "https://images.unsplash.com/photo-1498429089284-41f8cf3ffd39?w=1080&q=80",
-  "https://images.unsplash.com/photo-1507499739999-097706ad8914?w=1080&q=80",
-  "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=1080&q=80",
-  "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1080&q=80",
-  "https://images.unsplash.com/photo-1505144808419-1957a94ca45b?w=1080&q=80",
-  "https://images.unsplash.com/photo-1477959858617-67f30bc75b82?w=1080&q=80",
-  "https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?w=1080&q=80",
-  "https://images.unsplash.com/photo-1520034475321-cbe63696469a?w=1080&q=80",
-  "https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?w=1080&q=80",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1080&q=80",
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1080&q=80",
-  "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=1080&q=80",
-];
-
 function pickRandom<T>(items: T[]): T {
   const index = Math.floor(Math.random() * items.length);
   return items[index];
@@ -327,11 +278,6 @@ export class PastoralGenerator {
         ? pickRandom(MORNING_BLESSINGS)
         : pickRandom(EVENING_BLESSINGS);
 
-    const imageUrl =
-      period === "morning"
-        ? pickRandom(MORNING_PHOTOS)
-        : pickRandom(EVENING_PHOTOS);
-
     return {
       id: verse.id,
       period,
@@ -342,7 +288,8 @@ export class PastoralGenerator {
       greeting,
       reflection,
       blessing,
-      imageUrl,
+      imageUrl: "",
     };
   }
 }
+
