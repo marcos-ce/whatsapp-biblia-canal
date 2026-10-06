@@ -20,6 +20,23 @@ export class ChannelPublisher {
       return false;
     }
 
+    // 🛡️ TRAVA DE SEGURANÇA MÁXIMA: Impede terminantemente envio para números individuais
+    if (channelJid.endsWith("@s.whatsapp.net") || /^\d+$/.test(channelJid)) {
+      logger.fatal(
+        { channelJid },
+        "⛔ BLOQUEIO DE SEGURANÇA: CHANNEL_JID configurado é um número privado! O bot foi desenvolvido EXCLUSIVAMENTE para canais (@newsletter) e grupos (@g.us). Envio cancelado."
+      );
+      return false;
+    }
+
+    if (!channelJid.endsWith("@newsletter") && !channelJid.endsWith("@g.us")) {
+      logger.error(
+        { channelJid },
+        "⛔ CHANNEL_JID inválido: deve terminar com '@newsletter' (canal oficial) ou '@g.us' (grupo). Destinatários privados não são permitidos."
+      );
+      return false;
+    }
+
     const sock = getSocket();
     const messageText = BibleService.formatMessage(verse);
 
