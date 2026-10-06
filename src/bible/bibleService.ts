@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { DEVOTIONALS, DevotionalPost } from "./devotionals.js";
+import { CURATED_VERSES, BibleVerse } from "./verses.js";
+import { PastoralGenerator } from "./pastoralGenerator.js";
+import { DevotionalPost } from "./devotionals.js";
 
 const DATA_DIR = path.resolve(process.cwd(), "data");
 const HISTORY_FILE = path.resolve(DATA_DIR, "history.json");
@@ -37,28 +39,43 @@ function saveHistory(history: DevotionalHistory): void {
 
 export class BibleService {
   /**
-   * Obtém o devocional humanizado do período (manhã ou noite) sem repetições recentes
+   * Obtém uma publicação devocional pastoral humanizada gerada dinamicamente
+   * a partir do acervo de 110+ versículos canônicos, com garantia anti-repetição de 50+ dias.
    */
   static getDevotional(period: "morning" | "evening"): DevotionalPost {
     const history = loadHistory();
 
-    const pool = DEVOTIONALS.filter((d) => d.period === period);
-    const available = pool.filter((d) => !history.sentIds.includes(d.id));
+    const pool = CURATED_VERSES.filter((v) => v.period === period || v.period === "any");
+    const sentSet = new Set(history.sentIds);
+    let available = pool.filter((v) => !sentSet.has(v.id));
 
-    let chosen: DevotionalPost;
+    let chosenVerse: BibleVerse;
 
     if (available.length > 0) {
       const index = Math.floor(Math.random() * available.length);
-      chosen = available[index];
+      chosenVerse = available[index];
     } else {
-      // Se todos os devocionais do período já foram enviados, reinicia o histórico desse período
-      const poolIds = new Set(pool.map((d) => d.id));
-      history.sentIds = history.sentIds.filter((id) => !poolIds.has(id));
-      const index = Math.floor(Math.random() * pool.length);
-      chosen = pool[index];
+      // Quando todos os 55 versículos do período já foram enviados,
+      // reinicia o ciclo mantendo os 15 mais recentes protegidos para nunca repetir de imediato.
+      const poolIds = pool.map((v) => v.id);
+      const poolIdSet = new Set(poolIds);
+      const recentPoolSent = history.sentIds.filter((id) => poolIdSet.has(id)).slice(-15);
+
+      history.sentIds = history.sentIds
+        .filter((id) => !poolIdSet.has(id))
+        .concat(recentPoolSent);
+
+      const newSentSet = new Set(history.sentIds);
+      available = pool.filter((v) => !newSentSet.has(v.id));
+      const index = Math.floor(Math.random() * available.length);
+      chosenVerse = available[index];
     }
 
-    history.sentIds.push(chosen.id);
+    history.sentIds.push(chosenVerse.id);
+    if (history.sentIds.length > 200) {
+      history.sentIds = history.sentIds.slice(-100);
+    }
+
     const today = new Date().toISOString().split("T")[0];
     if (period === "morning") {
       history.lastMorningDate = today;
@@ -67,7 +84,8 @@ export class BibleService {
     }
     saveHistory(history);
 
-    return chosen;
+    // Gera a publicação humanizada, com reflexão pastoral e foto HD serena
+    return PastoralGenerator.generatePost(chosenVerse, period);
   }
 
   /**
