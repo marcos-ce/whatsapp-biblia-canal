@@ -4,6 +4,8 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore,
   WASocket,
+  CacheStore,
+  proto,
 } from "@whiskeysockets/baileys";
 import { Boom } from "@hapi/boom";
 import path from "path";
@@ -29,12 +31,39 @@ export function getBotPhone(): string {
   return botPhone;
 }
 
+// ── Cache de mensagens e retentativas (evita travamento e erros E2EE) ──
+const recentMessagesCache = new Map<string, proto.IMessage>();
+
+function createMemoryCache(): CacheStore {
+  const map = new Map<string, any>();
+  return {
+    get<T>(key: string): T | undefined {
+      return map.get(key);
+    },
+    set<T>(key: string, value: T): void {
+      map.set(key, value);
+      if (map.size > 2000) {
+        const first = map.keys().next().value;
+        if (first) map.delete(first);
+      }
+    },
+    del(key: string): void {
+      map.delete(key);
+    },
+    flushAll(): void {
+      map.clear();
+    },
+  };
+}
+
+const msgRetryCounterCache = createMemoryCache();
+
 export async function connectToWhatsApp(): Promise<WASocket> {
   const authDir = path.resolve(process.cwd(), "data/auth");
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
-  const { version } = await fetchLatestBaileysVersion();
+  const { version, isLatest } = await fetchLatestBaileysVersion();
 
-  logger.info({ version }, "Iniciando Baileys para o Canal Bíblico...");
+  logger.info({ version, isLatest }, "Iniciando Baileys para o Canal Bíblico...");
 
   const sock = makeWASocket({
     version,
@@ -46,11 +75,36 @@ export async function connectToWhatsApp(): Promise<WASocket> {
     logger: logger.child({ name: "baileys" }) as any,
     generateHighQualityLinkPreview: false,
     syncFullHistory: false,
+    // ⚡ Ignora histórico de mensagens antigas: economiza RAM na VPS e previne timeout 408 no handshake inicial
+    shouldSyncHistoryMessage: () => false,
     markOnlineOnConnect: false,
-    browser: ["Ubuntu", "Chrome", "120.0.0"],
+    browser: ["Mac OS", "Chrome", "120.0.0"],
+    connectTimeoutMs: 60_000,
+    defaultQueryTimeoutMs: 90_000,
+    keepAliveIntervalMs: 25_000,
+    msgRetryCounterCache,
+    getMessage: async (key: proto.IMessageKey): Promise<proto.IMessage | undefined> => {
+      if (key.id) {
+        return recentMessagesCache.get(key.id);
+      }
+      return undefined;
+    },
   });
 
   sock.ev.on("creds.update", saveCreds);
+
+  // Armazena mensagens em cache para o Baileys responder a retry requests de forma instantânea
+  sock.ev.on("messages.upsert", async ({ messages }) => {
+    for (const msg of messages) {
+      if (msg.key.id && msg.message) {
+        recentMessagesCache.set(msg.key.id, msg.message);
+        if (recentMessagesCache.size > 1000) {
+          const oldestKey = recentMessagesCache.keys().next().value;
+          if (oldestKey) recentMessagesCache.delete(oldestKey);
+        }
+      }
+    }
+  });
 
   sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect, qr } = update;
@@ -78,10 +132,24 @@ export async function connectToWhatsApp(): Promise<WASocket> {
       activeSocket = sock;
       botPhone = (sock.user?.id ?? "").split(":")[0].split("@")[0];
       logger.info({ botPhone }, "✅ WhatsApp conectado com sucesso para o Canal Bíblico!");
+
+      // Keep-alive de presença a cada 30 segundos: impede que o WhatsApp desconecte por ociosidade
+      const keepAliveInterval = setInterval(async () => {
+        if (activeSocket !== sock) {
+          clearInterval(keepAliveInterval);
+          return;
+        }
+        try {
+          await sock.sendPresenceUpdate("available");
+        } catch {
+          // Ignora silenciosamente
+        }
+      }, 30_000);
+      keepAliveInterval.unref();
     }
   });
 
-  // Registra comandos administrativos privados para testes imediatos (/postar, /bomdia, /boanoite)
+  // Registra comandos administrativos privados para testes imediatos (/postar, /bomdia, /boanoite, /status)
   registerAdminCommands(sock);
 
   return sock;

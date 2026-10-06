@@ -31,7 +31,8 @@ export class ChannelPublisher {
       if (typeof sock.newsletterMetadata === "function") {
         const meta = await sock.newsletterMetadata("invite", inviteCode);
         if (meta?.id) {
-          resolvedChannelJid = meta.id;
+          const rawId = String(meta.id);
+          resolvedChannelJid = rawId.includes("@") ? rawId : `${rawId}@newsletter`;
           logger.info(
             { jid: resolvedChannelJid, name: meta.name },
             "✅ JID do canal resolvido com sucesso pelo link de convite!"
