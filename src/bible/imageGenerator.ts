@@ -31,7 +31,7 @@ function cleanTextForImage(text: string): string {
     .trim();
 }
 
-function wrapText(text: string, maxCharsPerLine = 38): string[] {
+function wrapText(text: string, maxCharsPerLine = 44): string[] {
   const words = text.split(" ");
   const lines: string[] = [];
   let current = "";
@@ -55,7 +55,7 @@ function wrapText(text: string, maxCharsPerLine = 38): string[] {
 export class ImageGenerator {
   /**
    * Renderiza a imagem devocional sagrada sobrepondo o texto de Bênçãos e Orações
-   * sobre a imagem oficial da Bíblia Sagrada em alta resolução.
+   * sobre a imagem oficial da Bíblia Sagrada em alta resolução e fonte ampliada.
    */
   static async generateDevotionalCard(post: DevotionalPost): Promise<Buffer> {
     const assetPath = path.resolve(process.cwd(), "assets", "images", "bible-background.jpg");
@@ -87,15 +87,16 @@ export class ImageGenerator {
       : "✦ ORAÇÃO E BÊNÇÃO DA NOITE ✦";
 
     const cleanBlessing = cleanTextForImage(post.blessing);
-    const lines = wrapText(cleanBlessing, 38);
+    const lines = wrapText(cleanBlessing, 44);
 
-    const fontSize = lines.length > 3 ? 21 : 24;
-    const lineHeight = fontSize + 14;
+    // Tipografia ampliada: fonte 32px (ou 28px se mais de 3 linhas) para legibilidade perfeita no celular
+    const fontSize = lines.length > 3 ? 28 : 32;
+    const lineHeight = fontSize + 16;
 
-    // Calcula posição vertical para centralizar harmoniosamente no espaço escuro superior
+    // Calcula posição vertical para centralizar com perfeição no terço escuro superior da foto
     const totalTextHeight = lines.length * lineHeight;
-    const availableCenterY = 200;
-    const startY = Math.max(130, Math.round(availableCenterY - totalTextHeight / 2));
+    const availableCenterY = 210;
+    const startY = Math.max(145, Math.round(availableCenterY - totalTextHeight / 2));
 
     const tspans = lines
       .map((line, idx) => {
@@ -110,26 +111,26 @@ export class ImageGenerator {
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="overlay" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#000000" stop-opacity="0.82"/>
-          <stop offset="60%" stop-color="#000000" stop-opacity="0.55"/>
+          <stop offset="0%" stop-color="#000000" stop-opacity="0.88"/>
+          <stop offset="65%" stop-color="#000000" stop-opacity="0.60"/>
           <stop offset="100%" stop-color="#000000" stop-opacity="0.0"/>
         </linearGradient>
         <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.95"/>
+          <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.98"/>
         </filter>
       </defs>
       
       <!-- Degradê suave para contraste absoluto do texto sobre o fundo -->
-      <rect x="0" y="0" width="${width}" height="380" fill="url(#overlay)" />
+      <rect x="0" y="0" width="${width}" height="400" fill="url(#overlay)" />
       
-      <!-- Título de Oração / Bênção em Ouro -->
-      <text x="512" y="70" text-anchor="middle" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#facc15" letter-spacing="3" filter="url(#shadow)">${headerEscaped}</text>
+      <!-- Título de Oração / Bênção em Ouro (24px em negrito com sombra) -->
+      <text x="512" y="68" text-anchor="middle" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#facc15" letter-spacing="3" filter="url(#shadow)">${headerEscaped}</text>
       
-      <!-- Linha dourada delicada de separação -->
-      <line x1="360" y1="92" x2="664" y2="92" stroke="#facc15" stroke-width="1.5" stroke-opacity="0.75" />
+      <!-- Linha dourada de destaque e separação -->
+      <line x1="280" y1="92" x2="744" y2="92" stroke="#facc15" stroke-width="2" stroke-opacity="0.8" />
       
-      <!-- Texto da Bênção / Oração centralizado -->
-      <text x="512" y="${startY}" text-anchor="middle" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="500" fill="#ffffff" filter="url(#shadow)">${tspans}</text>
+      <!-- Texto da Bênção / Oração em tipografia ampliada de alto impacto -->
+      <text x="512" y="${startY}" text-anchor="middle" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="600" fill="#ffffff" filter="url(#shadow)">${tspans}</text>
     </svg>`;
 
     return sharp(bgBuffer)
