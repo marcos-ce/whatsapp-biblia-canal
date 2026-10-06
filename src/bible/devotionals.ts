@@ -49,7 +49,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Bom dia, vencedores! Levante a cabeça com coragem e ânimo. 🦁",
     reflection: "Os desafios de hoje podem parecer grandes, mas o Deus que caminha ao seu lado é infinitamente maior. Não deixe o desânimo paralisar você; avance sabendo que você nunca está desamparado.",
     blessing: "Que a coragem do Espírito Santo guie suas escolhas hoje. Tenha um dia de vitórias e conquistas! 🙏",
-    imageUrl: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=1080&q=80",
   },
   {
     id: 4,
@@ -73,7 +73,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Bom dia! Receba esta palavra de força para começar o dia com o coração firme. 🛡️",
     reflection: "Se alguma incerteza tentou roubar sua paz logo cedo, lembre-se: Deus prometeu segurar a sua mão. Você não precisa enfrentar as lutas de hoje sozinho; a força do Alto te sustenta a cada passo.",
     blessing: "Caminhe com a certeza da proteção divina sobre a sua vida e seu trabalho. Um dia abençoado! 🙏",
-    imageUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1080&q=80",
   },
   {
     id: 6,
@@ -121,7 +121,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Bom dia, amigos! Onde está o seu foco nesta manhã? 🏔️",
     reflection: "Não olhe apenas para o tamanho dos problemas; olhe para o Deus que governa o universo inteiro. Quem criou os céus e a terra tem todo o poder para intervir e cuidar das suas necessidades hoje.",
     blessing: "Que a certeza do socorro de Deus guarde seus pensamentos durante todo o dia. Vá em paz! 🙏",
-    imageUrl: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1080&q=80",
   },
   {
     id: 10,
@@ -133,7 +133,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Bom dia! Comece esta jornada sabendo que você é capacitado por Deus. 💪",
     reflection: "Você não precisa temer as responsabilidades ou cobranças do dia de hoje. Aquele que começou a boa obra em você é fiel para te sustentar em cada etapa do caminho.",
     blessing: "Que a graça e a força do Senhor estejam visíveis em tudo o que suas mãos fizerem hoje. Amém! ✨",
-    imageUrl: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=1080&q=80",
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Boa noite, queridos! Que a paz de Deus envolva a sua casa agora. 🌙",
     reflection: "O dia de hoje chegou ao fim. As batalhas que você travou já passaram e você venceu mais uma jornada. Não leve as preocupações ou a lista de afazeres para a cama; agora é momento de soltar o peso e deixar Deus cuidar do amanhã.",
     blessing: "Deite a cabeça no travesseiro com o coração tranquilo. Tenha uma noite de sono suave e revigorante! Até amanhã. 🤍",
-    imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1510784722466-f2aa9c52fff6?w=1080&q=80",
   },
   {
     id: 102,
@@ -161,7 +161,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Boa noite, família! Hora de desacelerar os pensamentos e descansar. 🕯️",
     reflection: "Muitas vezes a mente teima em continuar correndo mesmo quando o corpo pede descanso. Faça uma oração silenciosa, entregue cada ansiedade nas mãos de Jesus e permita que o Espírito Santo acalme a sua alma.",
     blessing: "Que os anjos do Senhor acampem ao redor do seu lar. Durma em perfeita paz e segurança! 🙏",
-    imageUrl: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=1080&q=80",
   },
   {
     id: 103,
@@ -173,7 +173,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Boa noite! Sentindo o cansaço do dia que passou? Há um convite especial para você. 🕊️",
     reflection: "Jesus conhece o peso das suas responsabilidades e as lutas silenciosas que ninguém mais vê. Ele não quer que você carregue tudo sozinho; o descanso que Ele oferece restaura não apenas o corpo, mas também as emoções e o espírito.",
     blessing: "Descarregue todo o cansaço aos pés da cruz e receba o refrigério do Senhor. Tenha uma noite de sono abençoado! ✨",
-    imageUrl: "https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?w=1080&q=80",
   },
   {
     id: 104,
@@ -233,7 +233,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Boa noite, guerreiros! O trabalho de hoje acabou; agora é hora de receber o presente do sono. 🛏️",
     reflection: "Trabalhar com zelo é bom, mas viver angustiado por medo do futuro não é plano de Deus. Ele ama você e quer te presentear com uma noite de repouso restaurador para que amanhã você acorde com novas forças.",
     blessing: "Acalme o coração e receba o descanso concedido pelo Senhor. Tenha uma noite muito abençoada! 🤍",
-    imageUrl: "https://images.unsplash.com/photo-1498429089284-41f8cf3ffd39?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1080&q=80",
   },
   {
     id: 109,
@@ -245,7 +245,7 @@ export const DEVOTIONALS: DevotionalPost[] = [
     greeting: "Boa noite na paz de Jesus! Vamos terminar o dia com um coração agradecido? 🌸",
     reflection: "Mesmo que o dia não tenha sido perfeito, houve livramentos que você viu e outros que você nem percebeu. O ar nos pulmões, a vida, o pão e a proteção do Senhor são motivos diários de gratidão.",
     blessing: "Que a gratidão feche as portas para qualquer tristeza e traga uma noite doce e serena para você. Durma em paz! 🙏",
-    imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1080&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1080&q=80",
   },
   {
     id: 110,
